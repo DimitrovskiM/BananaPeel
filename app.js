@@ -7,8 +7,19 @@ const emailEl = document.getElementById("email");
 const toggle = document.getElementById("toggle");
 const mainCard = document.getElementById("mainCard");
 
-// Регистрирај посета еднаш при отворање на страницата.
-fetch("/api/visit", { method: "POST" }).catch(() => {});
+// 1) Иницијализација на Supabase клиент (Замени ги вредностите со твоите од Supabase Settings > API)
+const supabaseUrl = 'YOUR_SUPABASE_URL_HERE';
+const supabaseKey = 'YOUR_SUPABASE_ANON_KEY_HERE';
+const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+// Регистрирај посета во базата наместо преку локален /api/visit рутер (Опционално)
+async function registerVisit() {
+  try {
+    // Ако направиш табела за посети 'visits', можеш да го откоментираш ова:
+    // await supabase.from('visits').insert([{ visited_at: new Date() }]);
+  } catch {}
+}
+registerVisit();
 
 // Email validation
 function isValidEmail(email) {
@@ -29,7 +40,7 @@ toggle.addEventListener("click", () => {
   pw.type = pw.type === "password" ? "text" : "password";
 });
 
-// Најава: испраќаме САМО скор, не лозинката.
+// Најава: Испраќање податоци директно во облак базата на Supabase
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
 
@@ -39,15 +50,30 @@ form.addEventListener("submit", async (e) => {
   }
   const { score, hints } = scorePassword(pw.value);
   const username = usernameEl.value;
-  const age = ageEl.value;
+  const age = parseInt(ageEl.value); // Конвертирај го внесот во бројка
+  const email = emailEl.value;
 
+  // 2) Зачувување на корисничките податоци директно во Supabase табелата 'users'
   try {
-    await fetch("/api/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ strength: score, username, age }),
-    });
-  } catch {}
+    const { error } = await supabase
+      .from('users')
+      .insert([
+        { 
+          username: username, 
+          age: age, 
+          email: email, 
+          strength: score 
+        }
+      ]);
+      
+    if (error) {
+      console.error("Грешка при зачувување:", error.message);
+    } else {
+      console.log("Успешно запишано во Supabase!");
+    }
+  } catch (err) {
+    console.error("Мрежна грешка:", err);
+  }
 
   const hintsHtml = hints.map(h => `<li>${h}</li>`).join("");
 
