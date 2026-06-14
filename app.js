@@ -8,8 +8,8 @@ const toggle = document.getElementById("toggle");
 const mainCard = document.getElementById("mainCard");
 
 // 1) Иницијализација на Supabase клиент (Замени ги вредностите со твоите од Supabase Settings > API)
-const supabaseUrl = 'YOUR_SUPABASE_URL_HERE';
-const supabaseKey = 'YOUR_SUPABASE_ANON_KEY_HERE';
+const supabaseUrl = 'https://evzdxqjvevibtzbmwzub.supabase.co/rest/v1/';
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV2emR4cWp2ZXZpYnR6Ym13enViIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE0MzkyNjYsImV4cCI6MjA5NzAxNTI2Nn0.-0qyrnKf9EPbAYltuqibkY2y77Qqwnd98opQQg-EOE8';
 const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
 // Регистрирај посета во базата наместо преку локален /api/visit рутер (Опционално)
