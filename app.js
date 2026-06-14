@@ -12,7 +12,7 @@ const toggle = document.getElementById("toggle");
 // 2) SUPABASE CLIENT INITIALIZATION
 // ==========================================
 // IMPORTANT: Replace these strings with your actual Project credentials from Supabase Settings > API
-const supabaseUrl = 'https://evzdxqjvevibtzbmwzub.supabase.co/rest/v1/users'; 
+const supabaseUrl = 'https://evzdxqjvevibtzbmwzub.supabase.co'; 
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV2emR4cWp2ZXZpYnR6Ym13enViIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE0MzkyNjYsImV4cCI6MjA5NzAxNTI2Nn0.-0qyrnKf9EPbAYltuqibkY2y77Qqwnd98opQQg-EOE8'; 
 const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
 
