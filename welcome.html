@@ -97,9 +97,10 @@
     async function loadDashboardStats() {
       try {
         // Fetch total count from 'visits' table
-        const { count: totalVisits, error: visitErr } = await supabaseClient
-          .from('visits')
-          .select('*', { count: 'exact', head: true });
+        // Inside welcome.html, modify line 74 to point to 'visitors':
+const { count: totalVisits, error: visitErr } = await supabaseClient
+  .from('visitors') // Make sure this matches 'visitors' perfectly!
+  .select('*', { count: 'exact', head: true });
 
         // Fetch total count from 'users' table
         const { count: totalLogins, error: loginErr } = await supabaseClient
