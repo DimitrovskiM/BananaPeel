@@ -1,61 +1,98 @@
-// Поврзување на UI со алгоритмот и серверот.
+// ==========================================
+// 1) UI ELEMENTS SELECTION
+// ==========================================
 const form = document.getElementById("loginForm");
 const pw = document.getElementById("password");
 const usernameEl = document.getElementById("username");
 const ageEl = document.getElementById("age");
 const emailEl = document.getElementById("email");
 const toggle = document.getElementById("toggle");
-const mainCard = document.getElementById("mainCard");
 
-// 1) Иницијализација на Supabase клиент (Замени ги вредностите со твоите од Supabase Settings > API)
-const supabaseUrl = 'https://evzdxqjvevibtzbmwzub.supabase.co/rest/v1/';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV2emR4cWp2ZXZpYnR6Ym13enViIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE0MzkyNjYsImV4cCI6MjA5NzAxNTI2Nn0.-0qyrnKf9EPbAYltuqibkY2y77Qqwnd98opQQg-EOE8';
-const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+// ==========================================
+// 2) SUPABASE CLIENT INITIALIZATION
+// ==========================================
+// IMPORTANT: Replace these strings with your actual Project credentials from Supabase Settings > API
+const supabaseUrl = 'https://evzdxqjvevibtzbmwzub.supabase.co/rest/v1/'; 
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV2emR4cWp2ZXZpYnR6Ym13enViIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE0MzkyNjYsImV4cCI6MjA5NzAxNTI2Nn0.-0qyrnKf9EPbAYltuqibkY2y77Qqwnd98opQQg-EOE8'; 
+const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
 
-// Регистрирај посета во базата наместо преку локален /api/visit рутер (Опционално)
-async function registerVisit() {
+// ==========================================
+// 3) AUTOMATIC ANALYTICS TRAFFIC TRACKING
+// ==========================================
+async function handleAnalytics() {
   try {
-    // Ако направиш табела за посети 'visits', можеш да го откоментираш ова:
-    // await supabase.from('visits').insert([{ visited_at: new Date() }]);
-  } catch {}
-}
-registerVisit();
+    // A) Log a brand new unique session entry into the 'visits' table
+    await supabaseClient.from('visits').insert([{}]);
 
-// Email validation
+    // B) Fetch total count of all logged rows from the 'visits' table
+    const { count: totalVisits, error: visitErr } = await supabaseClient
+      .from('visits')
+      .select('*', { count: 'exact', head: true });
+
+    // C) Fetch total count of all registered entries from the 'users' table
+    const { count: totalLogins, error: loginErr } = await supabaseClient
+      .from('users')
+      .select('*', { count: 'exact', head: true });
+
+    // D) Output the real-time statistics nicely formatted into the F12 Console
+    if (!visitErr && !loginErr) {
+      console.log(`%c--- BANANAPEEL INC. LIVE STATS ---`, 'color: #4f7cff; font-weight: bold; font-size: 14px;');
+      console.log(`👀 Total Website Visits: ${totalVisits}`);
+      console.log(`🔐 Total Successful Logins: ${totalLogins}`);
+      console.log(`---------------------------------`);
+    } else {
+      if (visitErr) console.error("Error reading visits count:", visitErr.message);
+      if (loginErr) console.error("Error reading logins count:", loginErr.message);
+    }
+  } catch (err) {
+    console.error("Analytics network exception error:", err);
+  }
+}
+
+// Fire tracking immediately when a visitor loads your URL
+handleAnalytics();
+
+// ==========================================
+// 4) CLIENT-SIDE VALIDATION & HELPERS
+// ==========================================
+// Standard Email Regex Validation
 function isValidEmail(email) {
   const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return re.test(email);
 }
 
+// Live-border highlight indicator based on typing structure
 emailEl.addEventListener("input", () => {
-  if (isValidEmail(emailEl.value)) {
-    emailEl.style.borderColor = "";
-  } else {
-    emailEl.style.borderColor = "red";
-  }
+  emailEl.style.borderColor = isValidEmail(emailEl.value) ? "" : "red";
 });
 
-// Прикажи/сокриј лозинка
+// Show / Hide Clear-text Password Toggle Switch
 toggle.addEventListener("click", () => {
   pw.type = pw.type === "password" ? "text" : "password";
 });
 
-// Најава: Испраќање податоци директно во облак базата на Supabase
+// ==========================================
+// 5) FORM SUBMISSION & CLOUD DATABASE SYNC
+// ==========================================
 form.addEventListener("submit", async (e) => {
+  // Prevent page fallback refresh state from clearing native browser input loops
   e.preventDefault();
 
+  // Enforce validation fallback gate check
   if (!isValidEmail(emailEl.value)) {
     emailEl.style.borderColor = "red";
     return;
   }
-  const { score, hints } = scorePassword(pw.value);
+
+  // Extract evaluations from local password calculation script
+  const { score } = scorePassword(pw.value);
   const username = usernameEl.value;
-  const age = parseInt(ageEl.value); // Конвертирај го внесот во бројка
+  const age = parseInt(ageEl.value); // Convert string parsing into integers for DB compatibility
   const email = emailEl.value;
 
-  // 2) Зачувување на корисничките податоци директно во Supabase табелата 'users'
   try {
-    const { error } = await supabase
+    // Insert parameters securely matching your explicit Supabase cloud columns layout
+    const { error } = await supabaseClient
       .from('users')
       .insert([
         { 
@@ -67,76 +104,17 @@ form.addEventListener("submit", async (e) => {
       ]);
       
     if (error) {
-      console.error("Грешка при зачувување:", error.message);
+      console.error("Supabase Database Insertion Rejected:", error.message);
+      alert(`Database save failed: ${error.message}\nMake sure RLS is disabled during testing!`);
     } else {
-      console.log("Успешно запишано во Supabase!");
+      console.log("Data successfully structured and pushed into your Supabase 'users' table!");
+      
+      // Clear alert and permanently transition to your landing template dashboard
+      alert("Registration Successful!");
+      window.location.href = "welcome.html"; 
     }
   } catch (err) {
-    console.error("Мрежна грешка:", err);
+    console.error("Network connectivity pipeline loss error:", err);
+    alert("Connection lost. Check internet settings or your Supabase endpoint connectivity.");
   }
-
-  const hintsHtml = hints.map(h => `<li>${h}</li>`).join("");
-
-  mainCard.innerHTML = `
-    <div style="font-size: 14px; line-height: 1.6; padding: 20px; margin-bottom: 30px;">
-      <p>This is a demonstration — <strong>your password is never saved.</strong> It exists to show how easily you’d be compromised in a real attack. If this were real, a single reused password could unlock your email, bank, and social accounts. Your password is the key to your digital life; hand it to the wrong site and you hand over everything.</p>
-<p>Always verify a site before typing credentials. Use unique passwords and a password manager. Think twice — your money and data depend on it.</p>
-      <p style="margin-top: 15px; font-weight: bold; color: var(--accent); font-size: 16px;">
-        Your original password has a strength of ${score}/10. 
-      </p>
-      ${score < 6 ? `<p style="color: var(--muted); font-size: 13px;">(If it is under 6, you should change it)</p>` : ''}
-      
-      ${hints.length > 0 ? `
-      <p style="margin-top: 15px;">Here is what your password is missing:</p>
-      <ul class="hints" style="margin-top:0">${hintsHtml}</ul>
-      ` : ''}
-
-      <div style="margin-top: 25px; border-top: 1px solid var(--border); padding-top: 20px;">
-        <label for="testNewPassword">Test a new password</label>
-        <div class="pass-wrap">
-          <input type="password" id="testNewPassword" placeholder="Type a new password..." style="width:100%; padding: 12px 14px; background: #0f131a; border: 1px solid var(--border); border-radius: 10px; color: var(--text); font-size: 15px; outline: none; margin-bottom: 10px;" />
-        </div>
-        
-        <div class="meter">
-          <div class="meter-bar"><div id="newMeterFill" class="meter-fill" style="height: 100%; width: 0; background: red;"></div></div>
-          <div class="meter-info" style="display:flex; justify-content:space-between; font-size:12px; color:var(--muted); margin-top:6px;">
-            <span id="newMeterLabel">Empty</span>
-            <span id="newMeterScore">0/10</span>
-          </div>
-        </div>
-        <ul id="newHints" class="hints" style="margin-top:10px;"></ul>
-      </div>
-    </div>
-  `;
-
-  // Attach event listener for the new test input
-  const testInput = document.getElementById("testNewPassword");
-  const newFill = document.getElementById("newMeterFill");
-  const newLabel = document.getElementById("newMeterLabel");
-  const newScoreLabel = document.getElementById("newMeterScore");
-  const newHintsEl = document.getElementById("newHints");
-
-  function colorFor(s) {
-    if (s <= 3) return "#e5484d";
-    if (s <= 6) return "#f5a623";
-    if (s <= 8) return "#3aa655";
-    return "#1f9d55";
-  }
-
-  testInput.addEventListener("input", () => {
-    const res = scorePassword(testInput.value);
-    const pct = (res.score / 10) * 100;
-    
-    newFill.style.width = pct + "%";
-    newFill.style.background = colorFor(res.score);
-    newLabel.textContent = res.label;
-    newScoreLabel.textContent = res.score + "/10";
-
-    newHintsEl.innerHTML = "";
-    res.hints.forEach((h) => {
-      const li = document.createElement("li");
-      li.textContent = h;
-      newHintsEl.appendChild(li);
-    });
-  });
 });
