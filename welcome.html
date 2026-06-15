@@ -99,7 +99,7 @@
         // Fetch total count from 'visits' table
         // Inside welcome.html, modify line 74 to point to 'visitors':
 const { count: totalVisits, error: visitErr } = await supabaseClient
-  .from('visits') // Make sure this matches 'visitors' perfectly!
+  .from('visits')    
   .select('*', { count: 'exact', head: true });
 
         // Fetch total count from 'users' table
