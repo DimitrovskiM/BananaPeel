@@ -93,7 +93,7 @@ function scorePassword(pw) {
 }
 
 // ==========================================
-// 6) FORM SUBMISSION: SAVE TO SUPABASE + SHOW THE EXACT HTML CARD
+// 6) FORM SUBMISSION: SAVE TO SUPABASE + SHOW ANALYSIS CARD (no alert, no redirect)
 // ==========================================
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -120,9 +120,8 @@ form.addEventListener("submit", async (e) => {
     }
 
     console.log("Data saved to Supabase 'users' table");
-    alert("Registration Successful!");
 
-    // ----- REPLACE THE FORM WITH YOUR EXACT DESIRED HTML -----
+    // ----- REPLACE THE FORM WITH THE PASSWORD ANALYSIS CARD -----
     const hintsHtml = hints.map(h => `<li>${h}</li>`).join("");
 
     mainCard.innerHTML = `
