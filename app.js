@@ -12,8 +12,8 @@ const mainCard = document.getElementById("mainCard"); // the .split-card contain
 // ==========================================
 // 2) SUPABASE CLIENT INITIALIZATION
 // ==========================================
-const supabaseUrl = 'https://evzdxqjvevibtzbmwzub.supabase.co'; 
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV2emR4cWp2ZXZpYnR6Ym13enViIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE0MzkyNjYsImV4cCI6MjA5NzAxNTI2Nn0.-0qyrnKf9EPbAYltuqibkY2y77Qqwnd98opQQg-EOE8'; 
+const supabaseUrl = 'https://evzdxqjvevibtzbmwzub.supabase.co';
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV2emR4cWp2ZXZpYnR6Ym13enViIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE0MzkyNjYsImV4cCI6MjA5NzAxNTI2Nn0.-0qyrnKf9EPbAYltuqibkY2y77Qqwnd98opQQg-EOE8';
 const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
 
 // ==========================================
@@ -93,7 +93,7 @@ function scorePassword(pw) {
 }
 
 // ==========================================
-// 6) FORM SUBMISSION: SAVE TO SUPABASE + SHOW ANALYSIS CARD
+// 6) FORM SUBMISSION: SAVE TO SUPABASE + SHOW THE EXACT HTML CARD
 // ==========================================
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -122,7 +122,7 @@ form.addEventListener("submit", async (e) => {
     console.log("Data saved to Supabase 'users' table");
     alert("Registration Successful!");
 
-    // ----- REPLACE THE FORM WITH THE ANALYSIS CARD (NO REDIRECT) -----
+    // ----- REPLACE THE FORM WITH YOUR EXACT DESIRED HTML -----
     const hintsHtml = hints.map(h => `<li>${h}</li>`).join("");
 
     mainCard.innerHTML = `
@@ -144,6 +144,7 @@ form.addEventListener("submit", async (e) => {
           <div class="pass-wrap">
             <input type="password" id="testNewPassword" placeholder="Type a new password..." style="width:100%; padding: 12px 14px; background: #0f131a; border: 1px solid var(--border); border-radius: 10px; color: var(--text); font-size: 15px; outline: none; margin-bottom: 10px;" />
           </div>
+          
           <div class="meter">
             <div class="meter-bar"><div id="newMeterFill" class="meter-fill" style="height: 100%; width: 0; background: red;"></div></div>
             <div class="meter-info" style="display:flex; justify-content:space-between; font-size:12px; color:var(--muted); margin-top:6px;">
